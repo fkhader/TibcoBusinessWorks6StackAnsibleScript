@@ -1,0 +1,90 @@
+---
+
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_bw6_sap82}}"
+   file: 
+     path:  "{{unzip_home_bw6_sap82}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: unzip "{{install_media_sap_jco}}" to "/tmp"
+   unarchive:
+      src: "{{install_media_sap_jco}}"
+      dest: "/tmp"
+      remote_src: no #Changed to pick file from local
+   
+ - name: Creates directory "{{tib_home}}/sapjco30P_17-10005328"
+   file: 
+     path:  "{{tib_home}}/sapjco30P_17-10005328"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+      
+ - name: unzip "sapjco3-linuxx86_64-3.0.17.tgz" to "{{tib_home}}"
+   unarchive:
+      src: "/tmp/sapjco3-linuxx86_64-3.0.17.tgz"
+      dest: "{{tib_home}}/sapjco30P_17-10005328"
+      remote_src: yes
+    
+ - name: unzip "{{install_media_bw6_sap82}}" to "{{unzip_home_bw6_sap82}}"
+   unarchive:
+      src: "{{install_media_bw6_sap82}}"
+      dest: "{{unzip_home_bw6_sap82}}"
+      remote_src: no
+   
+
+ - name: Replace config params in BW6 silent file "{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}" for installationRoot
+   replace:
+       dest="{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}"
+       regexp='<entry key="installationRoot">/opt/tibco/bw</entry>'
+       replace='<entry key="installationRoot">{{tib_home}}</entry>'
+       backup=yes
+
+ - name: Replace config params in BW6 silent file "{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}" for configDirectoryRoot
+   replace:
+       dest="{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}"
+       regexp='<entry key="configDirectoryRoot">/opt/tibco/bw</entry>'
+       replace='<entry key="configDirectoryRoot">{{tib_config_home}}</entry>'
+       backup=yes
+
+ - name: Replace config params in BW6 silent file "{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}"
+       regexp='bw6'
+       replace='{{tib_environment}}'
+       backup=yes
+
+ - name: Replace config params in BW6 silent file "{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}" for sap.jco.dir
+   replace:
+       dest="{{unzip_home_bw6_sap82}}{{silent_report_bw6_sap82}}"
+       regexp='<entry key="sap.jco.dir">/tmp</entry>'
+       replace='<entry key="sap.jco.dir">{{tib_home}}/sapjco30P_17-10005328</entry>'
+       backup=yes
+
+ - name: Run BW6 SAP plugin silent install using "{{unzip_home_bw6_sap82}}{{installer}} -silent"
+   command: "{{unzip_home_bw6_sap82}}{{installer}} -silent"
+   args:
+      chdir: "{{unzip_home_bw6_sap82}}"
+      
+

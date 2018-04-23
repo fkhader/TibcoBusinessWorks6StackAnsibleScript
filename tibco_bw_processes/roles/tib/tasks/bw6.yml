@@ -1,0 +1,108 @@
+---
+
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_bw6}}"
+   file: 
+     path:  "{{unzip_home_bw6}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: Creates directory "{{tib_home}}"
+   file: 
+     path:  "{{tib_home}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     recurse: yes
+     state: directory
+   become_user: root
+    
+ - name: unzip "{{install_media_bw6}}" to "{{unzip_home_bw6}}"
+   unarchive:
+      src: "{{install_media_bw6}}"
+      dest: "{{unzip_home_bw6}}"
+      remote_src: no
+
+      
+
+ - name: Replace config params in BW6 silent file "{{unzip_home_bw6}}{{silent_report_bw6}}" for /opt/tibco/bw
+   replace:
+       dest="{{unzip_home_bw6}}{{silent_report_bw6}}"
+       regexp='/opt/tibco/bw'
+       replace='{{tib_home}}'
+       backup=yes
+
+ - name: Replace config params in BW6 silent file "{{unzip_home_bw6}}{{silent_report_bw6}}" for /opt/tibco
+   replace:
+       dest="{{unzip_home_bw6}}{{silent_report_bw6}}"
+       regexp='/opt/tibco'
+       replace='{{tib_home}}'
+       backup=yes
+
+ - name: Replace config params in BW6 silent file "{{unzip_home_bw6}}{{silent_report_bw6}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_bw6}}{{silent_report_bw6}}"
+       regexp='bw6'
+       replace='{{tib_environment}}'
+       backup=yes
+
+ - name: Run BW6 silent install using "{{unzip_home_bw6}}{{installer}} -silent"
+   command: "{{unzip_home_bw6}}{{installer}} -silent"
+   args:
+      chdir: "{{unzip_home_bw6}}"
+      
+
+# BW Install HF--002
+ - name: Creates directory "{{unzip_home_bw6_hf}}"
+   file: 
+     path:  "{{unzip_home_bw6_hf}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+     
+ - name: unzip "{{install_media_bw6_hf}}"  to "{{unzip_home_bw6_hf}}"
+   unarchive:
+      src: "{{install_media_bw6_hf}}"
+      dest: "{{unzip_home_bw6_hf}}"
+      remote_src: no
+
+ - name: Copy from "{{unzip_home_bw6}}{{silent_report_bw6}}" to "{{unzip_home_bw6_hf}}{{silent_report_bw6_hf}}"
+   copy:
+       src: "{{unzip_home_bw6}}{{silent_report_bw6}}"
+       dest: "{{unzip_home_bw6_hf}}{{silent_report_bw6_hf}}"
+       remote_src: yes
+       backup: yes
+
+ - name: Copy from "{{unzip_home_bw6}}{{installer}}" to "{{unzip_home_bw6_hf}}"
+   copy:
+       src: "{{unzip_home_bw6}}{{installer}}"
+       dest: "{{unzip_home_bw6_hf}}"
+       remote_src: yes
+       backup: no
+       mode: 0755
+       
+ - name: Run BW silent install using "{{unzip_home_bw6_hf}}{{installer}} -silent"
+   command: "{{unzip_home_bw6_hf}}{{installer}} -silent"
+   args:
+      chdir: "{{unzip_home_bw6_hf}}"

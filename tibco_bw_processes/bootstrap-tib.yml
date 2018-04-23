@@ -1,0 +1,12 @@
+---
+- hosts: '{{ install_host }}'
+  become: true
+  become_user: '{{ user }}'
+        
+  roles:
+     - tib
+
+     
+
+           
+

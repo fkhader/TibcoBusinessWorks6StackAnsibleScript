@@ -1,0 +1,122 @@
+---
+
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_tea}}"
+   file: 
+     path:  "{{unzip_home_tea}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: Creates directory "{{tib_home}}"
+   file: 
+     path:  "{{tib_home}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     recurse: yes
+     state: directory
+   become_user: root
+
+         
+ - name: unzip "{{install_media_tea}}"  to "{{unzip_home_tea}}"
+   unarchive:
+      src: "{{install_media_tea}}"
+      dest: "{{unzip_home_tea}}"
+      remote_src: no
+
+
+ - name: Replace config params in TEA silent file "{{unzip_home_tea}}{{silent_report_tea}}" for /home/user/tibco
+   replace:
+       dest="{{unzip_home_tea}}{{silent_report_tea}}"
+       regexp='/home/user/tibco'
+       replace='{{tib_config_home}}'
+       backup=yes
+
+ - name: Replace config params in TEA silent file "{{unzip_home_tea}}{{silent_report_tea}}" for /opt/TIBCO/tea
+   replace:
+       dest="{{unzip_home_tea}}{{silent_report_tea}}"
+       regexp='/opt/TIBCO/tea'
+       replace='{{tib_home}}'
+       backup=yes
+
+ - name: Replace JDK params in TEA silent file "{{unzip_home_tea}}{{silent_report_tea}}" for /opt/java/jdk1.7.0_71
+   replace:
+       dest="{{unzip_home_tea}}{{silent_report_tea}}"
+       regexp='/opt/java/jdk1.7.0_71'
+       replace='{{jdk_home}}'
+       backup=yes
+       
+ - name: Replace config params in TEA silent file "{{unzip_home_tea}}{{silent_report_tea}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_tea}}{{silent_report_tea}}"
+       regexp='tea-2.3'
+       replace='{{tib_environment}}'
+       backup=yes
+
+ - name: Run TEA silent install using "{{unzip_home_tea}}{{installer}} -silent"
+   command: "{{unzip_home_tea}}{{installer}} -silent"
+   args:
+      chdir: "{{unzip_home_tea}}"
+      
+# TEA Install HF--001
+ - name: Creates directory "{{unzip_home_tea_hf}}"
+   file: 
+     path:  "{{unzip_home_tea_hf}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+     
+ - name: unzip "{{install_media_tea_hf}}"  to "{{unzip_home_tea_hf}}"
+   unarchive:
+      src: "{{install_media_tea_hf}}"
+      dest: "{{unzip_home_tea_hf}}"
+      remote_src: no
+
+ - name: Replace config params in TEA silent file "{{unzip_home_tea_hf}}{{silent_report_tea_hf}}" for /opt/TIBCO/tea
+   replace:
+       dest="{{unzip_home_tea_hf}}{{silent_report_tea_hf}}"
+       regexp='/opt/TIBCO/tea'
+       replace='{{tib_home}}'
+       backup=yes
+       
+ - name: Replace config params in TEA silent file "{{unzip_home_tea_hf}}{{silent_report_tea_hf}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_tea_hf}}{{silent_report_tea_hf}}"
+       regexp='tea-2.2'
+       replace='{{tib_environment}}'
+       backup=yes
+
+ - name: Copy from "{{unzip_home_tea}}{{installer}}" to "{{unzip_home_tea_hf}}"
+   copy:
+       src: "{{unzip_home_tea}}{{installer}}"
+       dest: "{{unzip_home_tea_hf}}"
+       remote_src: yes
+       backup: no
+       mode: 0755
+
+ - name: Run TEA silent install using "{{unzip_home_tea_hf}}{{installer}} -silent"
+   command: "{{unzip_home_tea_hf}}{{installer}} -silent"
+   args:
+      chdir: "{{unzip_home_tea_hf}}"
+

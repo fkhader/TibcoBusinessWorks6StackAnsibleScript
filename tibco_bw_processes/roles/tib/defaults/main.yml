@@ -1,0 +1,30 @@
+---
+# defaults file for tib
+#Common package variables
+tib_home: /apps/tibco2
+tib_config_home: /apps/tibco2/TIBCO_HOME2
+user_home: /home/tibuser/
+user: tibuser
+tib_environment: TIBCO_HOME
+jdk_home: /usr/lib/jvm/java-1.8.0-openjdk
+#jdk_home: /usr/lib/jvm/default-java
+
+#Install Software
+install_type: 
+install_host:
+
+package_debian:
+  - x11-apps
+  - unzip
+  - libxtst-dev
+  - default-jdk   
+  
+package_redhat:
+  - xorg-x11-apps
+  - unzip
+  - libXtst
+  - java-1.8.0-openjdk-devel   
+  
+  
+lgpl_assembly: /thirdpartyDownload'
+ems_home: /ems/8.4/

@@ -1,0 +1,45 @@
+---
+- name: Update Packages Debian
+  apt:
+        upgrade: yes
+        state: present
+        update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Update Packages RedHat
+  yum:
+        name: '*'
+        state: latest
+        update_cache: true
+  when: ansible_os_family == "RedHat"
+  become_user: root
+
+- name: I think I am installing in Debian. Print where I am Installing!!!
+  debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+  when:
+     - ansible_os_family == "Debian"
+
+- name: I think I am installing in RedHat. Print where I am Installing!!!
+  debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+  when:
+     - ansible_os_family == "RedHat"
+
+- name: Debian ---> Install X11 Apps, Unzip, libxtst-dev, default-jdk
+  apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+  with_items: "{{package_debian}}"
+  when: ansible_os_family == "Debian"
+  become_user: root
+      
+- name: RedHat ---> Install X11 Apps, Unzip, libxtst, java-1.8.0-openjdk-devel 
+  yum:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+  with_items: "{{package_redhat}}"
+  when: ansible_os_family == "RedHat"
+  become_user: root

@@ -1,0 +1,101 @@
+---
+
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_rv}}"
+   file: 
+     path:  "{{unzip_home_rv}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: Creates directory "{{tib_home}}"
+   file: 
+     path:  "{{tib_home}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     recurse: yes
+     state: directory
+   become_user: root
+
+
+ - name: unzip "{{install_media_rv}}"  to "{{unzip_home_rv}}"
+   unarchive:
+      src: "{{install_media_rv}}"
+      dest: "{{unzip_home_rv}}"
+      remote_src: no
+   become: true
+   become_user: "{{user}}" 
+
+ - name: Replace config params in RV silent file "{{unzip_home_rv}}{{silent_report_rv}}" for /opt/tibco
+   replace:
+       dest="{{unzip_home_rv}}{{silent_report_rv}}"
+       regexp='/opt/tibco'
+       replace='{{tib_home}}'
+       backup=yes
+
+ - name: Replace config params in RV silent file "{{unzip_home_rv}}{{silent_report_rv}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_rv}}{{silent_report_rv}}"
+       regexp='TIBCO-HOME'
+       replace='{{tib_environment}}'
+       backup=yes
+
+ - name: Run RV silent install using "{{unzip_home_rv}}{{installer_x86}} -silent"
+   command: "{{unzip_home_rv}}{{installer_x86}} -silent -is:javahome {{jdk_home}}"
+   args:
+      chdir: "{{unzip_home_rv}}"
+
+# RV HF 001 Install Specifics
+ - name: Creates directory "{{unzip_home_rv_hf}}"
+   file: 
+     path:  "{{unzip_home_rv_hf}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: unzip "{{install_media_rv_hf}}"  to "{{unzip_home_rv_hf}}"
+   unarchive:
+      src: "{{install_media_rv_hf}}"
+      dest: "{{unzip_home_rv_hf}}"
+      remote_src: no
+   become: true
+   become_user: "{{user}}" 
+   
+ - name: Copy from "{{unzip_home_rv_hf}}/bin" to "{{tib_home}}/tibrv/8.4/bin"
+   copy:
+       src: "{{unzip_home_rv_hf}}/bin/{{item}}"
+       dest: "{{tib_home}}/tibrv/8.4/bin"
+       remote_src: yes
+       backup: yes
+   with_items:
+       ['rvsd','rvsd64','rvsrd','rvsrd64']
+       
+ - name: Copy from "{{unzip_home_rv_hf}}" to "{{tib_home}}/tibrv/8.4"
+   copy:
+       src: "{{unzip_home_rv_hf}}/{{item}}"
+       dest: "{{tib_home}}/tibrv/8.4"
+       remote_src: yes
+       backup: no
+   with_items:
+       ['TIB_rv_8.4.4_HF-001_readme.txt']

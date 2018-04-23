@@ -1,0 +1,109 @@
+---
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_ems8}}"
+   file: 
+     path:  "{{unzip_home_ems8}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: Creates directory "{{tib_home}}"
+   file: 
+     path:  "{{tib_home}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     recurse: yes
+     state: directory
+   become_user: root
+         
+ - name: unzip "{{install_media_ems8}}"  to "{{unzip_home_ems8}}"
+   unarchive:
+      src: "{{install_media_ems8}}"
+      dest: "{{unzip_home_ems8}}"
+      remote_src: no
+
+ - name: Replace config params in EMS silent file "{{unzip_home_ems8}}{{silent_report_ems8}}" for /home/user/tibco
+   replace:
+       dest="{{unzip_home_ems8}}{{silent_report_ems8}}"
+       regexp='/home/user/tibco'
+       replace='{{tib_config_home}}'
+       backup=yes
+
+ - name: Replace config params in EMS silent file "{{unzip_home_ems8}}{{silent_report_ems8}}" for /opt/tibco
+   replace:
+       dest="{{unzip_home_ems8}}{{silent_report_ems8}}"
+       regexp='/opt/tibco'
+       replace='{{tib_home}}'
+       backup=yes
+
+ - name: Replace config params in EMS silent file "{{unzip_home_ems8}}{{silent_report_ems8}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_ems8}}{{silent_report_ems8}}"
+       regexp='TIBCO-HOME'
+       replace='{{tib_environment}}'
+       backup=yes
+       
+ - name: Replace config params in EMS silent file "<entry key="feature_EMS Server Baseline_ems">true</entry>" for "<entry key="feature_EMS Server Baseline_ems">false</entry>"
+   replace:
+       dest="{{unzip_home_ems8}}{{silent_report_ems8}}"
+       regexp='<entry key="feature_EMS Server Baseline_ems">true</entry>'
+       replace='<entry key="feature_EMS Server Baseline_ems">false</entry>'
+       backup=yes
+
+ - name: Run EMS silent install using "{{unzip_home_ems8}}{{installer_x86}} -silent"
+   command: "{{unzip_home_ems8}}{{installer_x86}} -silent  -is:javahome {{jdk_home}}"
+   args:
+      chdir: "{{unzip_home_ems8}}"
+
+# EMS HF_002 Install Specifics
+ - name: Creates directory "{{unzip_home_ems8_hf2}}"
+   file: 
+     path:  "{{unzip_home_ems8_hf2}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: unzip "{{install_media_ems8_hf2}}"  to "{{unzip_home_ems8_hf2}}"
+   unarchive:
+      src: "{{install_media_ems8_hf2}}"
+      dest: "{{unzip_home_ems8_hf2}}"
+      remote_src: no
+   
+ - name: Copy from "{{unzip_home_ems8_hf2}}/lib" to "{{tib_home}}/ems/8.3/lib"
+   copy:
+       src: "{{unzip_home_ems8_hf2}}/lib/{{item}}"
+       dest: "{{tib_home}}/ems/8.3/lib"
+       remote_src: yes
+       backup: yes
+   with_items:
+       ['tibjms.jar']
+
+ - name: Copy from "{{unzip_home_ems8_hf2}}" to "{{tib_home}}/ems/8.3"
+   copy:
+       src: "{{unzip_home_ems8_hf2}}/{{item}}"
+       dest: "{{tib_home}}/ems/8.3"
+       remote_src: yes
+       backup: no
+   with_items:
+       ['TIB_ems_8.3.0_HF-004_readme.txt']

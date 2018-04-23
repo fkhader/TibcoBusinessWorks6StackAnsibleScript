@@ -1,0 +1,123 @@
+---
+
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_tra}}"
+   file: 
+     path:  "{{unzip_home_tra}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: Creates directory "{{tib_home}}"
+   file: 
+     path:  "{{tib_home}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     recurse: yes
+     state: directory
+   become_user: root
+
+
+ - name: unzip "{{install_media_tra}}"  to "{{unzip_home_tra}}"
+   unarchive:
+      src: "{{install_media_tra}}"
+      dest: "{{unzip_home_tra}}"
+      remote_src: no
+   become: true
+   become_user: "{{user}}" 
+
+ - name: Replace config params in TRA silent file "{{unzip_home_tra}}{{silent_report_tra}}" for '{{tib_home}}/{{lgpl_assembly}}'
+   replace:
+       dest="{{unzip_home_tra}}{{silent_report_tra}}"
+       regexp='/opt/tibco/thirdpartyDownload'
+       replace='{{tib_home}}/{{lgpl_assembly}}'
+       backup=yes
+
+ - name: Replace config params in TRA silent file "{{unzip_home_tra}}{{silent_report_tra}}" for '{{tib_home}}'
+   replace:
+       dest="{{unzip_home_tra}}{{silent_report_tra}}"
+       regexp='/opt/tibco'
+       replace='{{tib_home}}'
+       backup=yes
+
+ - name: Replace config params in TRA silent file "{{unzip_home_tra}}{{silent_report_tra}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_tra}}{{silent_report_tra}}"
+       regexp='TRA'
+       replace='{{tib_environment}}'
+       backup=yes
+
+ - name: Replace config params in TRA silent file "{{unzip_home_tra}}{{silent_report_tra}}" for '{{tib_config_home}}'
+   replace:
+       dest="{{unzip_home_tra}}{{silent_report_tra}}"
+       regexp='/home/user/tibco_cfg'
+       replace='{{tib_config_home}}'
+       backup=yes
+
+ - name: Replace config params in TRA silent file "{{unzip_home_tra}}{{silent_report_tra}}" for '<entry key="emsConfigDir">{{tib_home}}/{{ems_home}}</entry>'
+   replace:
+       dest="{{unzip_home_tra}}{{silent_report_tra}}"
+       regexp='<entry key="emsConfigDir"></entry>'
+       replace='<entry key="emsConfigDir">{{tib_home}}/{{ems_home}}</entry>'
+       backup=yes
+
+ - name: Run TRA silent install using "{{unzip_home_tra}}{{installer}} -silent"
+   command: "{{unzip_home_tra}}{{installer}} -silent -is:javahome {{jdk_home}}"
+#   command: "{{unzip_home_tra}}{{installer}} -silent"
+   args:
+      chdir: "{{unzip_home_tra}}"
+
+# TRA HF 001 Install Specifics
+# - name: Creates directory "{{unzip_home_tra_hf}}"
+#   file: 
+#     path:  "{{unzip_home_tra_hf}}"
+#     owner: "{{user}}" 
+#     group: "{{user}}" 
+#     mode: 0755 
+#     state: directory
+#
+# - name: unzip "{{install_media_tra_hf}}"  to "{{unzip_home_tra_hf}}"
+#   unarchive:
+#      src: "{{install_media_tra_hf}}"
+#      dest: "{{unzip_home_tra_hf}}"
+#      remote_src: no
+#   become: true
+#   become_user: "{{user}}" 
+#   
+# - name: Copy from "{{unzip_home_tra_hf}}/bin" to "{{tib_home}}/tibrv/8.4/bin"
+#   copy:
+#       src: "{{unzip_home_tra_hf}}/bin/{{item}}"
+#       dest: "{{tib_home}}/tibrv/8.4/bin"
+#       remote_src: yes
+#       backup: yes
+#   with_items:
+#       ['rvsd','rvsd64','rvsrd','rvsrd64']
+#       
+# - name: Copy from "{{unzip_home_tra_hf}}" to "{{tib_home}}/tibrv/8.4"
+#   copy:
+#       src: "{{unzip_home_tra_hf}}/{{item}}"
+#       dest: "{{tib_home}}/tibrv/8.4"
+#       remote_src: yes
+#       backup: no
+#   with_items:
+#       ['TIB_tra_8.4.4_HF-001_readme.txt']

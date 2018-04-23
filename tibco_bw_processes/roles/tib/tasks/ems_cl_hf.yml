@@ -1,0 +1,61 @@
+---
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_ems8}}"
+   file: 
+     path:  "{{unzip_home_ems8}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+       
+# EMS HF_002 Install Specifics
+ - name: Creates directory "{{unzip_home_ems8_hf2}}"
+   file: 
+     path:  "{{unzip_home_ems8_hf2}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: unzip "{{install_media_ems8_hf2}}"  to "{{unzip_home_ems8_hf2}}"
+   unarchive:
+      src: "{{install_media_ems8_hf2}}"
+      dest: "{{unzip_home_ems8_hf2}}"
+      remote_src: no
+   
+ - name: Copy from "{{unzip_home_ems8_hf2}}/lib" to "{{tib_home}}/ems/8.3/lib"
+   copy:
+       src: "{{unzip_home_ems8_hf2}}/lib/{{item}}"
+       dest: "{{tib_home}}/ems/8.3/lib"
+       remote_src: yes
+       backup: yes
+   with_items:
+       ['tibjms.jar']
+
+ - name: Copy from "{{unzip_home_ems8_hf2}}" to "{{tib_home}}/ems/8.3"
+   copy:
+       src: "{{unzip_home_ems8_hf2}}/{{item}}"
+       dest: "{{tib_home}}/ems/8.3"
+       remote_src: yes
+       backup: no
+   with_items:
+       ['TIB_ems_8.3.0_HF-004_readme.txt']

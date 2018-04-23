@@ -1,0 +1,27 @@
+---
+# tasks file for tib
+ - import_tasks: pkg.yml  
+ - import_tasks: bw6.yml
+   when: install_type == 'bw6'
+ - import_tasks: bw6_sap.yml
+   when: install_type == 'bw6_sap'
+ - import_tasks: bw6_sap82.yml
+   when: install_type == 'bw6_sap82'
+ - import_tasks: bw6_odata.yml
+   when: install_type == 'bw6_odata'
+ - import_tasks: bw6_files.yml
+   when: install_type == 'bw6_files'
+ - import_tasks: ems.yml
+   when: install_type == 'ems'
+ - import_tasks: ems_cl.yml
+   when: install_type == 'ems_cl'
+ - import_tasks: ems_cl_hf.yml
+   when: install_type == 'ems_cl_hf'
+ - import_tasks: tea.yml
+   when: install_type == 'tea'
+ - import_tasks: hawk.yml
+   when: install_type == 'hawk'
+ - import_tasks: rv.yml
+   when: install_type == 'rv'
+ - import_tasks: tra.yml
+   when: install_type == 'tra'

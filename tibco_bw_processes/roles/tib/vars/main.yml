@@ -1,0 +1,83 @@
+---
+# vars file for tib
+#TIBCO Installer
+installer: TIBCOUniversalInstaller-lnx-x86-64.bin
+installer_x86: TIBCOUniversalInstaller-lnx-x86.bin
+
+#BW6 Install specifics 
+unzip_home_bw6: /tmp/TIB_BW_6.4.2_linux26gl23_x86_64/
+install_media_bw6: TIB_BW_6.4.2_linux26gl23_x86_64.zip
+silent_report_bw6: TIBCOUniversalInstaller_BW_6.4.2.silent
+#BW6 Hotfix HF-002 Install specifics 
+unzip_home_bw6_hf: /tmp/TIB_BW_6.4.2_HF-002/
+install_media_bw6_hf: TIB_BW_6.4.2_HF-002.zip
+silent_report_bw6_hf: TIBCOUniversalInstaller.silent
+
+#BW6 SAP Install specifics 
+unzip_home_bw6_sap: /tmp/TIB_bwpluginsap_8.1.1_linux26gl23_x86_64/
+install_media_bw6_sap: TIB_bwpluginsap_8.1.1_linux26gl23_x86_64.zip
+install_media_sap_jco: sapjco30P_17-10005328.zip
+silent_report_bw6_sap: TIBCOUniversalInstaller_bwpluginsap_8.1.1.silent
+
+#BW6 SAP 8.2.0 Install specifics 
+unzip_home_bw6_sap82: /tmp/TIB_bwpluginsap_8.2.0_linux26gl23_x86_64/
+install_media_bw6_sap82: TIB_bwpluginsap_8.2.0_linux26gl23_x86_64.zip
+silent_report_bw6_sap82: TIBCOUniversalInstaller_bwpluginsap_8.2.0.silent
+
+#BW6 OData Install specifics 
+unzip_home_bw6_odata: /tmp/TIB_bwpluginodata_6.0.1_linux26gl23_x86_64/
+install_media_bw6_odata: TIB_bwpluginodata_6.0.1_linux26gl23_x86_64.zip
+silent_report_bw6_odata: TIBCOUniversalInstaller_bwpluginodata_6.0.1.silent
+
+#BW6 Files Install specifics 
+unzip_home_bw6_files: /tmp/TIB_bwpluginfiles_8.0.0_linux26gl23_x86_64/
+install_media_bw6_files: TIB_bwpluginfiles_8.0.0_linux26gl23_x86_64.zip
+silent_report_bw6_files: TIBCOUniversalInstaller_bwpluginfiles_8.0.0.silent
+
+#EMS Install specifics 
+unzip_home_ems8: /tmp/TIB_ems_8.3.0_linux_x86/
+install_media_ems8: TIB_ems_8.3.0_linux_x86.zip
+silent_report_ems8: TIBCOUniversalInstaller-ems.silent
+#EMS Hotfix HF-002 Install specifics
+unzip_home_ems8_hf1: /tmp/TIB_ems_8.3.0_HF-002_linux_x86/
+install_media_ems8_hf1: TIB_ems_8.3.0_HF-002_linux_x86.zip
+#EMS Hotfix HF-005 Install specifics
+unzip_home_ems8_hf3: /tmp/TIB_ems_8.3.0_HF-005_linux_x86/
+install_media_ems8_hf3: TIB_ems_8.3.0_HF-005_linux_x86.zip
+
+#EMS Hotfix HF-004 Install specifics
+unzip_home_ems8_hf2: /tmp/TIB_ems_8.3.0_HF-004/
+install_media_ems8_hf2: TIB_ems_8.3.0_HF-004.zip
+
+#TEA Install specifics 
+unzip_home_tea: /tmp/TIB_tea_2.3.0_linux26gl23_x86_64/
+install_media_tea: TIB_tea_2.3.0_linux26gl23_x86_64.zip
+silent_report_tea: TIBCOUniversalInstaller_tea_2.3.0.silent
+#TEA Hotfix HF-001 Install specifics 
+unzip_home_tea_hf: /tmp/TIB_tea_2.3.0_HF-001/
+install_media_tea_hf: TIB_tea_2.3.0_HF-001.zip
+silent_report_tea_hf: TIBCOUniversalInstaller_tea_2.3.0.silent
+
+#RV  Install specifics 
+unzip_home_rv: /tmp/TIB_rv_8.4.4_linux_x86/
+install_media_rv: TIB_rv_8.4.4_linux_x86.zip
+silent_report_rv: TIBCOUniversalInstaller-rv.silent
+#RV HF 001 Install specifics
+unzip_home_rv_hf: /tmp/TIB_rv_8.4.4_HF-001_linux_x86/
+install_media_rv_hf: TIB_rv_8.4.4_HF-001_linux_x86.zip
+
+#Hawk Install specifics 
+unzip_home_hawk: /tmp/TIB_hawk_6.0.0_linux26gl23_x86_64.zip/
+install_media_hawk: TIB_hawk_6.0.0_linux26gl23_x86_64.zip
+silent_report_hawk: TIBCOUniversalInstaller_hawk_6.0.0.silent
+tomcatPort: 18080
+tomcatShutdownPort: 18081
+#Hawk Hotfix HF-002  Install specifics 
+unzip_home_hawk_hf: /tmp/TIB_hawk_6.0.0_HF-002_linux26gl23_x86_64/
+install_media_hawk_hf: TIB_hawk_6.0.0_HF-002_linux26gl23_x86_64.zip
+silent_report_hawk_hf: TIBCOUniversalInstaller_hawk_6.0.0.silent
+
+#TRA Install specifics
+unzip_home_tra: /tmp/TIB_TRA_5.10.0_linux_x86_64/
+install_media_tra: TIB_TRA_5.10.0_linux_x86_64.zip
+silent_report_tra: TIBCOUniversalInstaller_TRA_5.10.0.silent

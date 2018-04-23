@@ -1,0 +1,174 @@
+---
+ - name: I think I am installing in RedHat. Print where I am Installing!!!
+   debug:
+     msg: "{{ansible_hostname}} {{ansible_os_family}} install_type={{install_type}} install_host={{install_host}}"
+   when:
+     - ansible_os_family == "RedHat"
+
+ - name: Ensure "{{user}}" group is present
+   group:
+     name: "{{user}}"
+     state: present
+
+ - name: figure out who I am
+   command: whoami
+   register: whoami
+
+ - name: show who I am
+   debug:
+     msg: "I am {{whoami.stdout}}"
+
+ - name: Creates directory "{{unzip_home_ems8}}"
+   file: 
+     path:  "{{unzip_home_ems8}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: Creates directory "{{tib_home}}"
+   file: 
+     path:  "{{tib_home}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     recurse: yes
+     state: directory
+   become_user: root
+         
+ - name: unzip "{{install_media_ems8}}"  to "{{unzip_home_ems8}}"
+   unarchive:
+      src: "{{install_media_ems8}}"
+      dest: "{{unzip_home_ems8}}"
+      remote_src: no
+
+ - name: Replace config params in EMS silent file "{{unzip_home_ems8}}{{silent_report_ems8}}" for /home/user/tibco
+   replace:
+       dest="{{unzip_home_ems8}}{{silent_report_ems8}}"
+       regexp='/home/user/tibco'
+       replace='{{tib_config_home}}'
+       backup=yes
+
+ - name: Replace config params in EMS silent file "{{unzip_home_ems8}}{{silent_report_ems8}}" for /opt/tibco
+   replace:
+       dest="{{unzip_home_ems8}}{{silent_report_ems8}}"
+       regexp='/opt/tibco'
+       replace='{{tib_home}}'
+       backup=yes
+
+ - name: Replace config params in EMS silent file "{{unzip_home_ems8}}{{silent_report_ems8}}" for "{{tib_environment}}"
+   replace:
+       dest="{{unzip_home_ems8}}{{silent_report_ems8}}"
+       regexp='TIBCO-HOME'
+       replace='{{tib_environment}}'
+       backup=yes
+
+ - name: Run EMS silent install using "{{unzip_home_ems8}}{{installer_x86}} -silent"
+   command: "{{unzip_home_ems8}}{{installer_x86}} -silent  -is:javahome {{jdk_home}}"
+   args:
+      chdir: "{{unzip_home_ems8}}"
+
+# EMS HF_002 Install Specifics
+ - name: Creates directory "{{unzip_home_ems8_hf1}}"
+   file: 
+     path:  "{{unzip_home_ems8_hf1}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: unzip "{{install_media_ems8_hf1}}"  to "{{unzip_home_ems8_hf1}}"
+   unarchive:
+      src: "{{install_media_ems8_hf1}}"
+      dest: "{{unzip_home_ems8_hf1}}"
+      remote_src: no
+   
+ - name: Copy from "{{unzip_home_ems8_hf1}}/bin" to "{{tib_home}}/ems/8.3/bin"
+   copy:
+       src: "{{unzip_home_ems8_hf1}}/bin/{{item}}"
+       dest: "{{tib_home}}/ems/8.3/bin"
+       remote_src: yes
+       backup: yes
+   with_items:
+       ['tibemsd','tibemsd64']
+
+ - name: Copy from "{{unzip_home_ems8_hf1}}" to "{{tib_home}}/ems/8.3"
+   copy:
+       src: "{{unzip_home_ems8_hf1}}/{{item}}"
+       dest: "{{tib_home}}/ems/8.3"
+       remote_src: yes
+       backup: no
+   with_items:
+       ['TIB_ems_8.3.0_HF-002_readme.txt']
+       
+# EMS HF_005 Install Specifics
+ - name: Creates directory "{{unzip_home_ems8_hf3}}"
+   file: 
+     path:  "{{unzip_home_ems8_hf3}}"
+     owner: "{{user}}" 
+     group: "{{user}}" 
+     mode: 0755 
+     state: directory
+
+ - name: unzip "{{install_media_ems8_hf3}}"  to "{{unzip_home_ems8_hf3}}"
+   unarchive:
+      src: "{{install_media_ems8_hf3}}"
+      dest: "{{unzip_home_ems8_hf3}}"
+      remote_src: no
+   
+ - name: Copy from "{{unzip_home_ems8_hf3}}/lib" to "{{tib_home}}/ems/8.3/lib"
+   copy:
+       src: "{{unzip_home_ems8_hf3}}/lib/{{item}}"
+       dest: "{{tib_home}}/ems/8.3/lib"
+       remote_src: yes
+       backup: yes
+   with_items:
+       ['libcrypto.a' ,'libcrypto.so' ,'libcrypto.so.1.0.0' ,'libssl.a' ,'libssl.so' ,'libssl.so.1.0.0']
+
+ - name: Copy from "{{unzip_home_ems8_hf3}}/lib/64" to "{{tib_home}}/ems/8.3/lib/64"
+   copy:
+       src: "{{unzip_home_ems8_hf3}}/lib/64/{{item}}"
+       dest: "{{tib_home}}/ems/8.3/lib/64"
+       remote_src: yes
+       backup: yes
+   with_items:
+       ['libcrypto.a' ,'libcrypto.so' ,'libcrypto.so.1.0.0' ,'libssl.a' ,'libssl.so' ,'libssl.so.1.0.0']
+
+ - name: Copy from "{{unzip_home_ems8_hf3}}" to "{{tib_home}}/ems/8.3"
+   copy:
+       src: "{{unzip_home_ems8_hf3}}/{{item}}"
+       dest: "{{tib_home}}/ems/8.3"
+       remote_src: yes
+       backup: no
+   with_items:
+       ['TIB_ems_8.3.0_HF-005_readme.txt']
+       
+       
+#Replace 32bit with 64bit
+ - name: Copy from "{{tib_home}}/ems/8.3/bin/tibemsd" to "{{tib_home}}/ems/8.3/bin/tibemsd32"
+   copy:
+       src: "{{tib_home}}/ems/8.3/bin/tibemsd"
+       dest: "{{tib_home}}/ems/8.3/bin/tibemsd32"
+       remote_src: yes
+       backup: no
+
+ - name: Copy from "{{tib_home}}/ems/8.3/bin/tibemsd64" to "{{tib_home}}/ems/8.3/bin/tibemsd"
+   copy:
+       src: "{{tib_home}}/ems/8.3/bin/tibemsd64"
+       dest: "{{tib_home}}/ems/8.3/bin/tibemsd"
+       remote_src: yes
+       backup: no
+       
+ - name: Copy from "{{tib_home}}/ems/8.3/bin/tibemsadmin" to "{{tib_home}}/ems/8.3/bin/tibemsadmin32"
+   copy:
+       src: "{{tib_home}}/ems/8.3/bin/tibemsadmin"
+       dest: "{{tib_home}}/ems/8.3/bin/tibemsadmin32"
+       remote_src: yes
+       backup: no
+
+ - name: Copy from "{{tib_home}}/ems/8.3/bin/tibemsadmin64" to "{{tib_home}}/ems/8.3/bin/tibemsadmin"
+   copy:
+       src: "{{tib_home}}/ems/8.3/bin/tibemsadmin64"
+       dest: "{{tib_home}}/ems/8.3/bin/tibemsadmin"
+       remote_src: yes
+       backup: no
